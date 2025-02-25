@@ -3,17 +3,19 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const CricketUser = require('../models/CricketUser');
 const authMiddleware = require('../middleware/authMiddleware');  
+const { v4: uuidv4 } = require('uuid');  // Importing uuid
 
 const router = express.Router();
 
 // User Registration
 router.post("/register", async (req, res) => {
   try {
-    const { userId, username, phoneNumber, password, email } = req.body;
+    const { username, phoneNumber, password, email } = req.body;
 
     // Check if user already exists
     const existingUser = await CricketUser.findOne({ phoneNumber });
     if (existingUser) return res.status(400).json({ error: "Phone number already in use" });
+    const userId = uuidv4();  // Create a new UUID
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);

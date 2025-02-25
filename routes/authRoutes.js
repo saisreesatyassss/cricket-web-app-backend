@@ -14,6 +14,7 @@ router.post("/register", async (req, res) => {
     console.log("Start Registration Process");
 
     const { username, phoneNumber, password, email } = req.body;
+    const generatedUUID = uuidv4();
 
     // Check if user already exists
     console.log("Checking for existing user...");
@@ -27,7 +28,7 @@ router.post("/register", async (req, res) => {
     // Create new user
     console.log("Creating new user...");
     const newUser = new CricketUser({
-      userId: "pss",
+      userId:generatedUUID,
       username,
       phoneNumber,
       profilePage: { email },

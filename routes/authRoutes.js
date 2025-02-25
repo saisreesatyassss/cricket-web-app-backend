@@ -27,7 +27,7 @@ router.post("/register", async (req, res) => {
     // Create new user
     console.log("Creating new user...");
     const newUser = new CricketUser({
-      userId: "ss",
+      userId: uuidv4(),
       username,
       phoneNumber,
       profilePage: { email },

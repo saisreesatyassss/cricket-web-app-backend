@@ -6,30 +6,40 @@ const authMiddleware = require('../middleware/authMiddleware');
 const { v4: uuidv4 } = require('uuid');  // Importing uuid
 
 const router = express.Router();
+const startTime = Date.now();
 
 // User Registration
 router.post("/register", async (req, res) => {
   try {
+    console.log("Start Registration Process");
+
     const { username, phoneNumber, password, email } = req.body;
 
     // Check if user already exists
+    console.log("Checking for existing user...");
     const existingUser = await CricketUser.findOne({ phoneNumber });
     if (existingUser) return res.status(400).json({ error: "Phone number already in use" });
-    const userId = uuidv4();  // Create a new UUID
 
     // Hash password
+    console.log("Hashing password...");
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create new user
+    console.log("Creating new user...");
     const newUser = new CricketUser({
-      userId,
+      userId: uuidv4(),
       username,
       phoneNumber,
       profilePage: { email },
-      password: hashedPassword // This field must be in the schema
+      password: hashedPassword,
     });
 
     await newUser.save();
+    console.log("User created successfully.");
+
+    const duration = Date.now() - startTime;
+    console.log(`User registration completed in ${duration} ms`);
+
     res.status(201).json({ message: "User registered successfully" });
 
   } catch (err) {
@@ -37,6 +47,7 @@ router.post("/register", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
 
 // User Login
 router.post("/login", async (req, res) => {

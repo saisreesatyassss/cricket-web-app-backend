@@ -22,4 +22,34 @@ router.put("/update-profile", authMiddleware, async (req, res) => {
   }
 });
 
+
+// GET PROFILE
+router.get("/profile", authMiddleware, async (req, res) => {
+  try {
+    const user = await CricketUser.findOne({ userId: req.user.userId });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Sending only the profile information
+    const { firstName, lastName, education, stateOfResidence, gender, dateOfBirth } = user.profilePage;
+
+    res.json({
+      profile: {
+        firstName,
+        lastName,
+        education,
+        stateOfResidence,
+        gender,
+        dateOfBirth
+      }
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
 module.exports = router;

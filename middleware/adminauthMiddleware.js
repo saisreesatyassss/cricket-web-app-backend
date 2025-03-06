@@ -21,9 +21,6 @@ const adminAuthMiddleware = async (req, res, next) => {
     // Fetch user from the database to check the role
     const user = await PintudeUser.findOne({ userId }); // Use findOne if `userId` is not `_id`
 
-    // If your database uses `_id` for the user ID, use findById instead:
-    // const user = await PintudeUser.findById(userId);
-
     if (!user) {
       console.error('User not found'); // Debug log
       return res.status(404).json({ message: 'User not found' });

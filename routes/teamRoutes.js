@@ -534,17 +534,17 @@ router.post("/teams/create", authMiddleware, async (req, res) => {
       return res.status(400).json({ error: "Team must have at least 1 wicket-keeper" });
     }
     
-    if (playersByRole["batsman"] < 3) {
-      return res.status(400).json({ error: "Team must have at least 3 batsmen" });
-    }
+    // if (playersByRole["batsman"] < 3) {
+    //   return res.status(400).json({ error: "Team must have at least 3 batsmen" });
+    // }
     
-    if (playersByRole["bowler"] < 3) {
-      return res.status(400).json({ error: "Team must have at least 3 bowlers" });
-    }
+    // if (playersByRole["bowler"] < 3) {
+    //   return res.status(400).json({ error: "Team must have at least 3 bowlers" });
+    // }
     
-    if (playersByRole["all-rounder"] < 1) {
-      return res.status(400).json({ error: "Team must have at least 1 all-rounder" });
-    }
+    // if (playersByRole["all-rounder"] < 1) {
+    //   return res.status(400).json({ error: "Team must have at least 1 all-rounder" });
+    // }
 
     // Make sure players from one team are limited (max 7 players from one team)
     const playersByTeam = {};
@@ -670,17 +670,17 @@ router.put("/teams/:teamId", authMiddleware, async (req, res) => {
         return res.status(400).json({ error: "Team must have at least 1 wicket-keeper" });
       }
       
-      if (playersByRole["batsman"] < 3) {
-        return res.status(400).json({ error: "Team must have at least 3 batsmen" });
-      }
+      // if (playersByRole["batsman"] < 3) {
+      //   return res.status(400).json({ error: "Team must have at least 3 batsmen" });
+      // }
       
-      if (playersByRole["bowler"] < 3) {
-        return res.status(400).json({ error: "Team must have at least 3 bowlers" });
-      }
+      // if (playersByRole["bowler"] < 3) {
+      //   return res.status(400).json({ error: "Team must have at least 3 bowlers" });
+      // }
       
-      if (playersByRole["all-rounder"] < 1) {
-        return res.status(400).json({ error: "Team must have at least 1 all-rounder" });
-      }
+      // if (playersByRole["all-rounder"] < 1) {
+      //   return res.status(400).json({ error: "Team must have at least 1 all-rounder" });
+      // }
 
       // Check team distribution
       const playersByTeam = {};

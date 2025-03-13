@@ -9,6 +9,7 @@ const router = express.Router();
 const startTime = Date.now();
 
 // User Registration
+// User Registration
 router.post("/register", async (req, res) => {
   try {
     console.log("Start Registration Process");
@@ -28,7 +29,7 @@ router.post("/register", async (req, res) => {
     // Create new user
     console.log("Creating new user...");
     const newUser = new CricketUser({
-      userId:generatedUUID,
+      userId: generatedUUID,
       username,
       phoneNumber,
       profilePage: { email },
@@ -38,17 +39,28 @@ router.post("/register", async (req, res) => {
     await newUser.save();
     console.log("User created successfully.");
 
+    // Create JWT token
+    const token = jwt.sign(
+      { userId: newUser.userId, role: newUser.role || 'user' }, // Assuming 'role' exists in your user model
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
     const duration = Date.now() - startTime;
     console.log(`User registration completed in ${duration} ms`);
 
-    res.status(201).json({ message: "User registered successfully" });
+    // Return the response with token and user data
+    res.status(201).json({
+      message: "User registered successfully",
+      token,
+      user: { userId: newUser.userId, username: newUser.username, role: newUser.role || 'user' }
+    });
 
   } catch (err) {
     console.error("Registration Error:", err.message);
     res.status(500).json({ error: "Server error" });
   }
 });
-
 
 // User Login
 router.post("/login", async (req, res) => {
@@ -67,7 +79,7 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(
       { userId: user.userId, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "7d" }
     );
 
     res.json({ token, user: { userId: user.userId, username: user.username, role: user.role } });

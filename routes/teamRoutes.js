@@ -441,23 +441,26 @@ router.get("/matches/:matchId/players", async (req, res) => {
 });
 
 // ========== TEAM ROUTES ==========
-
-// CREATE USER TEAM FOR A MATCH
 router.post("/teams/create", authMiddleware, async (req, res) => {
   try {
+    console.log("Request received with body:", req.body);
+
     const { matchId, teamName, players } = req.body;
 
     if (!matchId || !teamName || !players) {
+      console.error("Validation failed: Missing required fields");
       return res.status(400).json({ error: "Missing required fields" });
     }
 
     // Check if match exists and is not completed
     const match = await Match.findById(matchId);
     if (!match) {
+      console.error(`Match not found with ID: ${matchId}`);
       return res.status(404).json({ error: "Match not found" });
     }
 
     if (match.status === "completed") {
+      console.error(`Match is completed. ID: ${matchId}`);
       return res.status(400).json({ error: "Cannot create team for completed match" });
     }
 
@@ -467,52 +470,61 @@ router.post("/teams/create", authMiddleware, async (req, res) => {
       matchId 
     });
     
+    console.log(`User has already created ${userTeamsCount} teams for match ID ${matchId}`);
+
     if (userTeamsCount >= match.maxTeamsPerUser) {
+      console.error(`User exceeded max teams limit for match ID ${matchId}`);
       return res.status(400).json({ 
         error: `You have reached the maximum limit of ${match.maxTeamsPerUser} teams for this match` 
       });
     }
 
-    // Validate team selection rules
+    // Validate team size
     if (!Array.isArray(players) || players.length !== 11) {
+      console.error(`Invalid team size. Received ${players.length} players`);
       return res.status(400).json({ error: "Team must have exactly 11 players" });
     }
 
-    // Verify captain and vice-captain are selected
+    // Check captain and vice-captain
     const captainCount = players.filter(p => p.isCaptain).length;
     const viceCaptainCount = players.filter(p => p.isViceCaptain).length;
-    
+
     if (captainCount !== 1) {
+      console.error(`Invalid captain count: ${captainCount}`);
       return res.status(400).json({ error: "Team must have exactly 1 captain" });
     }
     
     if (viceCaptainCount !== 1) {
+      console.error(`Invalid vice-captain count: ${viceCaptainCount}`);
       return res.status(400).json({ error: "Team must have exactly 1 vice-captain" });
     }
 
-    // Make sure captain and vice-captain are different players
     if (players.some(p => p.isCaptain && p.isViceCaptain)) {
+      console.error("Captain and vice-captain are the same player");
       return res.status(400).json({ error: "Captain and vice-captain must be different players" });
     }
 
-    // Convert match players to a more usable format with string IDs
+    // Convert match players to a usable format
     const matchPlayers = match.players.map(p => ({
       id: p._id.toString(),
       role: p.role,
       team: p.team
     }));
-    
+
+    console.log("Match players:", matchPlayers);
+
     // Validate that all players exist in the match
     const matchPlayerIds = matchPlayers.map(p => p.id);
     const invalidPlayers = players.filter(p => !matchPlayerIds.includes(p.playerId));
-    
+
     if (invalidPlayers.length > 0) {
+      console.error(`Invalid players selected: ${invalidPlayers.map(p => p.playerId).join(', ')}`);
       return res.status(400).json({ 
-        error: `The following players are not part of this match: ${invalidPlayers.map(p => p.playerId).join(', ')}` 
+        error: `Invalid players: ${invalidPlayers.map(p => p.playerId).join(', ')}` 
       });
     }
 
-    // Count players by role from selected players
+    // Validate role requirements
     const selectedPlayers = players.map(p => {
       const matchPlayer = matchPlayers.find(mp => mp.id === p.playerId);
       return {
@@ -529,24 +541,14 @@ router.post("/teams/create", authMiddleware, async (req, res) => {
       "all-rounder": selectedPlayers.filter(p => p.actualRole === "all-rounder").length
     };
 
-    // Validate role requirements
+    console.log("Players by role:", playersByRole);
+
     if (playersByRole["wicket-keeper"] < 1) {
+      console.error("Team must have at least 1 wicket-keeper");
       return res.status(400).json({ error: "Team must have at least 1 wicket-keeper" });
     }
-    
-    // if (playersByRole["batsman"] < 3) {
-    //   return res.status(400).json({ error: "Team must have at least 3 batsmen" });
-    // }
-    
-    // if (playersByRole["bowler"] < 3) {
-    //   return res.status(400).json({ error: "Team must have at least 3 bowlers" });
-    // }
-    
-    // if (playersByRole["all-rounder"] < 1) {
-    //   return res.status(400).json({ error: "Team must have at least 1 all-rounder" });
-    // }
 
-    // Make sure players from one team are limited (max 7 players from one team)
+    // Limit players from a single team
     const playersByTeam = {};
     for (const player of selectedPlayers) {
       playersByTeam[player.team] = (playersByTeam[player.team] || 0) + 1;
@@ -554,32 +556,25 @@ router.post("/teams/create", authMiddleware, async (req, res) => {
 
     for (const team in playersByTeam) {
       if (playersByTeam[team] > 7) {
+        console.error(`Too many players from team ${team}: ${playersByTeam[team]}`);
         return res.status(400).json({ 
           error: `Maximum 7 players allowed from a single team, you have selected ${playersByTeam[team]} from ${team}` 
         });
       }
     }
 
-    // Prepare players with correct roles for saving
-    const playersToSave = players.map(p => {
-      const matchPlayer = matchPlayers.find(mp => mp.id === p.playerId);
-      return {
-        playerId: p.playerId,
-        role: matchPlayer.role, // Use the role from the match data
-        isCaptain: p.isCaptain || false,
-        isViceCaptain: p.isViceCaptain || false
-      };
-    });
+    // Prepare players for saving
+      const playersToSave = players.map(p => {
+        const matchPlayer = matchPlayers.find(mp => mp.id === p.playerId);
+        return {
+          playerId: p.playerId,
+          name: p.name, // Add name field
+          role: matchPlayer.role,
+          isCaptain: p.isCaptain || false,
+          isViceCaptain: p.isViceCaptain || false
+        };
+      });
 
-    // Create and save the team
-    const newTeam = new Team({
-      userId: req.user._id,
-      matchId,
-      teamName,
-      players: playersToSave,
-      totalPoints: 0,
-      rank: 0
-    });
 
     // Check for duplicate team name
     const existingTeam = await Team.findOne({
@@ -589,10 +584,23 @@ router.post("/teams/create", authMiddleware, async (req, res) => {
     });
 
     if (existingTeam) {
+      console.error(`Duplicate team name for match ID ${matchId}`);
       return res.status(400).json({ error: "You already have a team with this name for this match" });
     }
 
+    // Create team
+    const newTeam = new Team({
+      userId: req.user._id,
+      matchId,
+      teamName,
+      players: playersToSave,
+      totalPoints: 0,
+      rank: 0
+    });
+
     await newTeam.save();
+
+    console.log(`Team created successfully: ID ${newTeam._id}`);
     res.status(201).json({ 
       message: "Team created successfully", 
       teamId: newTeam._id 
@@ -600,6 +608,7 @@ router.post("/teams/create", authMiddleware, async (req, res) => {
   } catch (err) {
     console.error("Team creation error:", err);
     if (err.code === 11000) {
+      console.error("Duplicate key error:", err.message);
       return res.status(400).json({ error: "You already have a team with this name for this match" });
     }
     res.status(500).json({ error: "Server error" });

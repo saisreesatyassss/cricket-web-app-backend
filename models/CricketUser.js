@@ -17,6 +17,13 @@ const userSchema = new mongoose.Schema({
   },
   role: { type: String, enum: ["user", "admin"], default: "user" },
   createdAt: { type: Date, default: Date.now },
+  uniqueId: { type: String,unique: true },
+  phoneNumberVerified: { type: Boolean, default: false },
+  panCardNumber: { type: String, unique: true, sparse: true },
+  panCardImages: [{ type: String }],
+  panCardVerified: { type: Boolean, default: false },
+
+
 });
 
 const CricketUser = mongoose.model("CricketUser", userSchema);

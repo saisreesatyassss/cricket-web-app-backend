@@ -4,7 +4,6 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// UPDATE PROFILE
 router.put("/update-profile", authMiddleware, async (req, res) => {
   try {
     const { firstName, lastName, education, stateOfResidence, gender, dateOfBirth } = req.body;

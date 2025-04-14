@@ -24,11 +24,13 @@ mongoose.connect(process.env.MONGO_URI)
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const teamRoutes = require('./routes/teamRoutes');
+const earlyaccessRoutes = require('./routes/earlyaccessRoutes');
 
  
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/team', teamRoutes);
+app.use('/api/earlyaccess', earlyaccessRoutes);
 
 
 app.get('/', (req, res) => {

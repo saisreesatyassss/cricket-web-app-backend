@@ -15,7 +15,7 @@ router.post("/register", async (req, res) => {
   try {
     console.log("Start Registration Process");
 
-    const { username, phoneNumber, password, email } = req.body;
+    const { username, phoneNumber, password, email, referral } = req.body;
     const generatedUUID = uuidv4();
     const generatedUniqueId = uuidv4(); // Generate uniqueId
 
@@ -32,12 +32,17 @@ router.post("/register", async (req, res) => {
     console.log("Creating new user...");
     const newUser = new CricketUser({
       userId: generatedUUID,
-      uniqueId: generatedUniqueId, // Assign generated uniqueId
+      uniqueId: generatedUniqueId,
       username,
       phoneNumber,
       profilePage: { email },
       password: hashedPassword,
     });
+
+    // If referral exists, assign it
+    if (referral) {
+      newUser.referral = referral;
+    }
 
     await newUser.save();
     console.log("User created successfully.");

@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema({
   panCardNumber: { type: String, unique: true, sparse: true },
   panCardImages: [{ type: String }],
   panCardVerified: { type: Boolean, default: false },
+  referral: { type: String }, 
 
 
 });

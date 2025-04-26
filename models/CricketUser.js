@@ -1,3 +1,5 @@
+// models/CricketUser.js
+
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
@@ -17,14 +19,12 @@ const userSchema = new mongoose.Schema({
   },
   role: { type: String, enum: ["user", "admin"], default: "user" },
   createdAt: { type: Date, default: Date.now },
-  uniqueId: { type: String,unique: true },
+  uniqueId: { type: String, unique: true },
   phoneNumberVerified: { type: Boolean, default: false },
   panCardNumber: { type: String, unique: true, sparse: true },
   panCardImages: [{ type: String }],
   panCardVerified: { type: Boolean, default: false },
-  referral: { type: String }, 
-
-
+  referral: { type: String },
 });
 
 const CricketUser = mongoose.model("CricketUser", userSchema);

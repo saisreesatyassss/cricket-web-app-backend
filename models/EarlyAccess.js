@@ -16,6 +16,9 @@ const earlyAccessSchema = new mongoose.Schema({
   paid: {
     type: Boolean,
     default: false
+  },
+  referral: {
+    type: String, // <-- ✅ New referral field
   }
 }, { timestamps: true });
 

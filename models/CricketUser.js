@@ -25,6 +25,12 @@ const userSchema = new mongoose.Schema({
   panCardImages: [{ type: String }],
   panCardVerified: { type: Boolean, default: false },
   referral: { type: String },
+    wallet: {
+    withdrawable: { type: Number},     
+    nonWithdrawable: { type: Number, default: 50 },  
+    isWalletFunded: { type: Boolean, default: false },
+
+  }
 });
 
 const CricketUser = mongoose.model("CricketUser", userSchema);

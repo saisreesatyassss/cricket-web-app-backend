@@ -74,7 +74,7 @@ router.get("/profile", authMiddleware, async (req, res) => {
       profilePage: {
         firstName: user.profilePage.firstName,
         lastName: user.profilePage.lastName,
-        profilePicture: user.profilePage.profilePicture,
+        // profilePicture: user.profilePage.profilePicture,
         education: user.profilePage.education,
         gender: user.profilePage.gender,
         stateOfResidence: user.profilePage.stateOfResidence,

@@ -211,6 +211,7 @@ router.get("/profile", authMiddleware, async (req, res) => {
       role: user.role,
       createdAt: user.createdAt,
       referral: user.referral,
+      referralId: user.referralId,
 
       profilePage: {
         firstName: user.profilePage.firstName,

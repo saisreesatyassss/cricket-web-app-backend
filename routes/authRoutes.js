@@ -113,11 +113,11 @@ const startTime = Date.now();
           dateOfBirth: null,
         },
         wallet: {
-          withdrawable: 0,
+          withdrawable: 49, // Starting cash
           nonWithdrawable: 50, // Default bonus
           isWalletFunded: false,
         },
-        referral: referral || undefined,
+        referral: referral || "",
       });
 
       await newUser.save();

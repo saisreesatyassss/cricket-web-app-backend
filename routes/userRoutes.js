@@ -22,6 +22,8 @@ router.put("/update-profile", authMiddleware, async (req, res) => {
 });
 
 
+
+
 // // GET PROFILE
 // router.get("/profile", authMiddleware, async (req, res) => {
 //   try {

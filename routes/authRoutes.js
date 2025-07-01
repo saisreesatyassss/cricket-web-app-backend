@@ -9,72 +9,7 @@ const router = express.Router();
 const startTime = Date.now();
 
 // User Registration
-
-
-// router.post("/register", async (req, res) => {
-//   try {
-//     console.log("Start Registration Process");
-
-//     const { username, phoneNumber, password, email, referral } = req.body;
-//     const generatedUUID = uuidv4();
-//     const generatedUniqueId = uuidv4(); // Generate uniqueId
-
-//     // Check if user already exists
-//     console.log("Checking for existing user...");
-//     const existingUser = await CricketUser.findOne({ phoneNumber });
-//     if (existingUser) return res.status(400).json({ error: "Phone number already in use" });
-
-//     // Hash password
-//     console.log("Hashing password...");
-//     const hashedPassword = await bcrypt.hash(password, 10);
-
-//     // Create new user
-//     console.log("Creating new user...");
-//     const newUser = new CricketUser({
-//       userId: generatedUUID,
-//       uniqueId: generatedUniqueId,
-//       username,
-//       phoneNumber,
-//       profilePage: { email },
-//       password: hashedPassword,
-//     });
-
-//     // If referral exists, assign it
-//     if (referral) {
-//       newUser.referral = referral;
-//     }
-
-//     await newUser.save();
-//     console.log("User created successfully.");
-
-//     // Create JWT token
-//     const token = jwt.sign(
-//       { userId: newUser.userId, uniqueId: newUser.uniqueId, role: newUser.role || "user" },
-//       process.env.JWT_SECRET,
-//       { expiresIn: "7d" }
-//     );
-
-//     console.log("User registration completed.");
-
-//     // Return the response with token and user data
-//     res.status(201).json({
-//       message: "User registered successfully",
-//       token,
-//       user: {
-//         userId: newUser.userId,
-//         uniqueId: newUser.uniqueId,
-//         username: newUser.username,
-//         role: newUser.role || "user",
-//       },
-//     });
-
-//   } catch (err) {
-//     console.error("Registration Error:", err.message);
-//     res.status(500).json({ error: "Server error" });
-//   }
-// });
-
-
+ 
   router.post("/register", async (req, res) => {
     try {
       console.log("Start Registration Process");

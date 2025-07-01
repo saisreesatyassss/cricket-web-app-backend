@@ -85,6 +85,9 @@ const contestSchema = new mongoose.Schema({
 
 const Contest = mongoose.model("Contest", contestSchema);
 
+
+
+
 // ==================== MIDDLEWARE ====================
 
 // Authentication Middleware
@@ -110,6 +113,8 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
+
+
 // Admin Middleware
 const adminMiddleware = (req, res, next) => {
   if (req.user.role !== "admin") {
@@ -117,6 +122,10 @@ const adminMiddleware = (req, res, next) => {
   }
   next();
 };
+
+
+
+
 
 // ==================== HELPER FUNCTIONS ====================
 
@@ -193,6 +202,8 @@ async function updateContestRankings(matchId) {
     console.error("Error updating contest rankings:", error);
   }
 }
+
+
 
 
 // ========== MATCH ROUTES ==========
@@ -399,6 +410,26 @@ router.get("/matches", async (req, res) => {
       .select('matchName teams venue matchDate status entryFee prizePool')
       .sort({ matchDate: 1 });
     
+    res.json(matches);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+router.get("/usermatches", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Step 1: Find all matchIds where user has joined a team
+    const userTeams = await Team.find({ userId }).select("matchId");
+
+    const matchIds = [...new Set(userTeams.map(team => team.matchId.toString()))];
+
+    // Step 2: Fetch those matches
+    const matches = await Match.find({ _id: { $in: matchIds } })
+      .select("matchName teams venue matchDate status entryFee prizePool")
+      .sort({ matchDate: 1 });
+
     res.json(matches);
   } catch (err) {
     console.error(err);

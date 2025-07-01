@@ -755,22 +755,51 @@ router.put("/teams/:teamId", authMiddleware, async (req, res) => {
 });
 
 // GET USER TEAMS
+ 
 router.get("/teams/my-teams", authMiddleware, async (req, res) => {
   try {
     const { matchId } = req.query;
-    
-    let query = { userId: req.user._id };
+
+    const query = { userId: req.user._id };
     if (matchId) {
       query.matchId = matchId;
     }
-    
-    const teams = await Team.find(query)
-      .sort({ createdAt: -1 });
-    
-    res.json(teams);
+
+    const teams = await Team.find(query).sort({ createdAt: -1 }).lean();
+
+    const matchIds = teams.map(team => team.matchId);
+
+    const matches = await Match.find({ _id: { $in: matchIds } }).lean();
+
+    // Build a map of playerId => { team, points }
+    const matchPlayerMap = new Map();
+
+    matches.forEach(match => {
+      match.players.forEach(player => {
+        matchPlayerMap.set(player._id.toString(), {
+          team: player.team,
+          points: player.points || 0,
+        });
+      });
+    });
+
+    // Enrich each team's players with their real team name and points
+    const enrichedTeams = teams.map(team => {
+      team.players = team.players.map(player => {
+        const full = matchPlayerMap.get(player.playerId.toString()) || {};
+        return {
+          ...player,
+          team: full.team || '',
+          points: full.points ?? 0,
+        };
+      });
+      return team;
+    });
+
+    res.json(enrichedTeams);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
